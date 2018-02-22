@@ -1,0 +1,69 @@
+{
+  "assets": {
+    "lemon": {"type":"image", "source": "assets/images/lemon.png"},
+    "hop": {"type":"image", "source": "assets/images/hop.png"},
+    "background_image": {"type":"image", "source": "assets/images/bg.png"},
+    "logo_image": {"type":"image", "source": "assets/images/logo.png"},
+    "header_image": {"type":"image","source":"assets/images/green-menu.png"},
+    "lemons_spritesheet":{"type":"spritesheet", "source":"assets/images/lemon.png", "frame_width": 92, "frame_height": 121},
+    "hops_spritesheet":{"type":"spritesheet", "source":"assets/images/hop.png", "frame_width": 85, "frame_height": 108}
+  },
+  "groups": [
+    "background",
+    "spawners",
+    "lemons",
+    "hops",
+    "cuts",
+    "hud"
+  ],
+  "prefabs": {
+    "background": {
+      "type" : "background",
+      "position": {"x":0, "y":0},
+      "properties": {
+        "texture": "background_image",
+        "group": "background"
+      }
+    },
+    "menu_header": {
+      "type": "background",
+      "position": {"x":0, "y":0},
+      "properties": {
+        "texture": "header_image",
+        "group": "background"
+      }
+    },
+    "logo": {
+      "type": "background",
+      "position": {"x":0, "y":0},
+      "properties": {
+        "texture": "logo_image",
+        "group": "background"
+      }
+    },
+    "lemon_spawner": {
+      "type": "lemon_spawner",
+      "position": {"x":0,"y":0},
+      "properties": {
+        "texture": "",
+        "group": "spawners",
+        "pool":"lemons",
+        "spawn_time": {"min":1, "max":3},
+        "velocity_x": {"min":-100, "max":100},
+        "velocity_y": {"min":850, "max":1000}
+      }
+    },
+    "hop_spawner": {
+      "type": "hop_spawner",
+      "position": {"x":0,"y":0},
+      "properties": {
+        "texture": "",
+        "group": "spawners",
+        "pool":"hops",
+        "spawn_time": {"min":1, "max":3},
+        "velocity_x": {"min":-100, "max":100},
+        "velocity_y": {"min":850, "max":1000}
+      }
+    }
+  }
+}
