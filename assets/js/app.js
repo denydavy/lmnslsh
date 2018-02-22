@@ -1,15 +1,16 @@
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
 
-var game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, "", {
+var game = new Phaser.Game(WIDTH, HEIGHT, Phaser.CANVAS, "", {
    preload: preload,
    //create: create,
-   update: update 
+   update: update ,
+    enableDebug: false
 });
 
 function loadFonts(){
     WebFontConfig = {
-        active: function() { game.time.events.add(Phaser.Timer.SECOND, create, this); },
+        active: function() { game.time.events.add(Phaser.Timer.SECOND, main_menu, this); },
         google: {
             families: ['Ubuntu:500']
         }
@@ -18,6 +19,11 @@ function loadFonts(){
 
 function preload() {
     game.load.image("bg", "assets/images/bg.png");
+    game.load.image("bg_main_menu", "assets/images/bg_main_menu.png");
+    game.load.image("main-screen-head", "assets/images/main-screen-head.png");
+    game.load.image("main-screen-btn", "assets/images/main-screen-btn.png");
+    game.load.image("main-screen-lemons", "assets/images/main-screen-lemons.png");
+    game.load.image("main-screen-text", "assets/images/main-screen-text.png");
     game.load.image("bbl1", "assets/images/bbl-1.png");
     game.load.image("bbl2", "assets/images/bbl-2.png");
     game.load.image("bbl3", "assets/images/bbl-3.png");
@@ -53,6 +59,38 @@ function preload() {
 
 var pool,mask,progress_bar_active;
 var total_score = 0;
+
+function main_menu(){
+    var bg = game.add.sprite(0,0,"bg_main_menu");
+    bg.width = game.world.width;
+    bg.height = game.world.height;
+
+    var logo = game.add.sprite(0,0,"main-screen-head");
+    var btn = game.add.sprite(0,0,"main-screen-btn");
+    var foot = game.add.sprite(0,0,"main-screen-lemons");
+    var txt = game.add.sprite(0,0,"main-screen-text");
+    var logo2 = game.add.sprite(0,0,"logo");
+    txt.scale.setTo(.6);
+    logo.scale.setTo(.6);
+    btn.scale.setTo(.6);
+    foot.scale.setTo(.6);
+    logo2.scale.setTo(.65);
+    logo.position.setTo((game.world.width - logo.width)/2, 60);
+    btn.position.setTo((game.world.width - btn.width)/2, logo.y + logo.height + 80);
+    txt.position.setTo((game.world.width - txt.width)/2, logo.y + logo.height + 30);
+    foot.position.setTo(0, game.world.height - foot.height);
+    logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - foot.height/3-5);
+
+    btn.inputEnabled = true;
+
+    btn.events.onInputDown.add(function (sprite, pointer) {
+        bg.kill();
+        logo.kill();
+        foot.kill();
+        btn.kill();
+        create();
+    }, game);
+}
 
 function create() {
 
@@ -118,7 +156,7 @@ function create() {
     bg.height = game.height;
     menu.width = game.width;
     menu.height = game.width * 196 / 640;
-    time.position.setTo(20,20);
+    time.position.setTo(15,20);
     time2.position.setTo(time.x + time.width + 2,18);
     time3.position.setTo(time2.x + time2.width + 2,20);
     scoreboard.position.set((WIDTH - scoreboard.width)/2,5);
@@ -147,7 +185,6 @@ function create() {
     var mObj = {a:0};
     var pbtml = new TimelineMax();
     pbtml.to(mObj, 30, {a:progress_bar.height, onUpdate:  function(){
-            console.log(mObj.a);
             if(mask !== undefined) mask.kill();
             mask = game.add.graphics(progress_bar_active.x, progress_bar_active.y + progress_bar_active.height);
             mask.beginFill(0x000000);
@@ -159,7 +196,7 @@ function create() {
 
     // progress_bar_active.mask = mask;
 
-    logo.scale.setTo(.6);
+    logo.scale.setTo(.65);
     logo.position.setTo((game.width - logo.width)/2, game.height - logo.height - 20);
 
     beer_bg_1.position.setTo(0,game.height);
@@ -325,6 +362,7 @@ function create() {
                             }});
                         if(t.key === "lemon"){
                             var splash = game.add.sprite(t.position.x, t.position.y, "splash-"+Math.ceil(Math.random()*3));
+                            cuts.add(splash)
                             splash.anchor.setTo(.5);
                             TweenMax.to(splash, 1, {alpha: 0, onComplete: function(){
                                     splash.kill();
@@ -410,9 +448,9 @@ function drawCut(pos) {
 }
 
 function update() {
-    if(pool && pool.children){
-        pool.children.forEach(function (value) {
-            value.angle += Math.random();
-        })
-    }
+    // if(pool && pool.children){
+    //     pool.children.forEach(function (value) {
+    //         value.angle += Math.random();
+    //     })
+    // }
 }
