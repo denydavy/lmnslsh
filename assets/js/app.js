@@ -36,6 +36,10 @@ function loadFonts(){
         active: function() { game.time.events.add(Phaser.Timer.SECOND, game.state.start("mainmenu"), this); },
         google: {
             families: ['Ubuntu:500']
+        },
+        custom: {
+            families: ['KiddyKitty'],
+            urls: ['assets/kk.css']
         }
     };
 }
@@ -101,7 +105,14 @@ function main_menu(){
     var logo = game.add.sprite(0,0,"main-screen-head");
     var btn = game.add.sprite(0,0,"main-screen-btn");
     var foot = game.add.sprite(0,0,"main-screen-lemons");
-    var txt = game.add.sprite(0,0,"main-screen-text");
+    var txt = game.add.text(0,0,"РУБИ ЛИМОНЫ,", {
+        font: "700 28px KiddyKitty",
+        fill: "#037f39"
+    });
+    var txt2 = game.add.text(0,0,"КАК НИНДЗЯ!", {
+        font: "700 28px KiddyKitty",
+        fill: "#037f39"
+    });
     var logo2 = game.add.sprite(0,0,"logo");
 
     var scale, offset;
@@ -118,6 +129,7 @@ function main_menu(){
     }
 
     txt.scale.setTo(scale);
+    txt2.scale.setTo(scale);
     logo.scale.setTo(scale);
     btn.scale.setTo(scale);
     foot.scale.setTo(scale);
@@ -126,7 +138,8 @@ function main_menu(){
 
     logo.position.setTo((game.world.width - logo.width)/2, offset);
     txt.position.setTo((game.world.width - txt.width)/2, logo.y + logo.height + 15);
-    btn.position.setTo((game.world.width - btn.width)/2, txt.y + txt.height+ 5);
+    txt2.position.setTo((game.world.width - txt2.width)/2, txt.y + txt.height - 5);
+    btn.position.setTo((game.world.width - btn.width)/2, txt2.y + txt2.height+ 5);
 
     foot.position.setTo(0, game.world.height - foot.height+40);
     logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - foot.height/3-5);
@@ -148,21 +161,37 @@ function create() {
     game.physics.arcade.gravity.y = 10;
     var time_left = 30;
 
+    var scale, offset, fsize;
+
+    if(game.world.width > 400){
+        scale = .65;
+        offset = 20;
+        fsize = 32;
+    } else if(game.world.width > 350) {
+        scale = .6;
+        offset = 15;
+        fsize = 30;
+    } else {
+        scale = .5;
+        offset = 15;
+        fsize = 26;
+    }
+
     var bg = game.add.sprite(0,0,"bg");
     var beerbgg = game.add.group(game, null, "beer");
     var menu = game.add.sprite(0,0,"menu");
     var time = game.add.text(0,0,"00", {
-        font: "500 32px Ubuntu",
+        font: "500 "+fsize+"px Ubuntu",
         fill: "#fff"
     });
 
     var time2 = game.add.text(0,0,":", {
-        font: "500 32px Ubuntu",
+        font: "500 "+fsize+"px Ubuntu",
         fill: "#fff"
     });
 
     var time3 = game.add.text(0,0,time_left, {
-        font: "500 32px Ubuntu",
+        font: "500 "+fsize+"px Ubuntu",
         fill: "#fff"
     });
 
@@ -202,19 +231,19 @@ function create() {
         game_over();
     }
     ,ease: Power0.easeNone});
-    btn.scale.setTo(.6);
-    scoreboard.scale.setTo(.6);
+    btn.scale.setTo(scale);
+    scoreboard.scale.setTo(scale);
     bg.width = game.width;
     bg.height = game.height;
     menu.width = game.width;
     menu.height = game.width * 196 / 640;
-    time.position.setTo(15,20);
-    time2.position.setTo(time.x + time.width + 2,18);
-    time3.position.setTo(time2.x + time2.width + 2,20);
+    time.position.setTo(offset, offset );
+    time2.position.setTo(time.x + time.width + 2,offset - 2);
+    time3.position.setTo(time2.x + time2.width + 2,offset);
     scoreboard.position.set((WIDTH - scoreboard.width)/2,5);
     score.anchor.setTo(.5);
-    score.position.setTo(scoreboard.x + scoreboard.width/2 + 30, scoreboard.y+scoreboard.height / 2+5);
-    btn.position.setTo(WIDTH - btn.width - 20,20);
+    score.position.setTo(scoreboard.x + scoreboard.width/2 + offset*1.5, scoreboard.y+scoreboard.height / 2+4);
+    btn.position.setTo(WIDTH - btn.width - offset,17);
     progress_bar.position.setTo(20, menu.height + 20);
     progress_bar.height = game.height - menu.height - 40;
     progress_bar.width = 15;
@@ -234,7 +263,7 @@ function create() {
             progress_bar_active.mask = mask;
     }, ease: Power0.easeNone});
 
-    logo.scale.setTo(.65);
+    logo.scale.setTo(scale);
     logo.position.setTo((game.width - logo.width)/2, game.height - logo.height - 20);
 
     beer_bg_1.position.setTo(0,game.height);
@@ -302,7 +331,7 @@ function create() {
             var v = get_vel();
             var obj = game.add.sprite(pos.x, pos.y, type);
             obj.anchor.setTo(.5);
-            obj.scale.setTo(.7);
+            obj.scale.setTo(scale);
             game.physics.arcade.enable(obj);
             obj.angle = getRandomInt(-45,45);
             obj.body.setSize(100,100);
@@ -449,26 +478,26 @@ function create() {
                             var bbltml = new TimelineMax({yoyo: true});
                             var bbls = game.add.sprite(100, game.world.height,"bbl1");
                             bbls.anchor.setTo(.5);
-                            bbls.scale.setTo(.6);
+                            bbls.scale.setTo(scale);
                             emotes.add(bbls);
                             bbltml.to(bbls, 1, {y: game.world.height - bbls.height/3, ease: Elastic.easeOut.config(1, 0.3)});
-                            bbltml.to(bbls, 1, {y: game.world.height + bbls.height});
+                            bbltml.to(bbls, 1, {y: game.world.height + bbls.height,delay:2});
                         } else if( total_score > 20 && emotes.children.length === 1){
                             var bbltml2 = new TimelineMax({yoyo: true});
                             var bbls2 = game.add.sprite(100, game.world.height,"bbl2");
                             bbls2.anchor.setTo(.5);
-                            bbls2.scale.setTo(.6);
+                            bbls2.scale.setTo(scale);
                             emotes.add(bbls2);
                             bbltml2.to(bbls2, 1, {y: game.world.height - bbls2.height/3, ease: Elastic.easeOut.config(1, 0.3)});
-                            bbltml2.to(bbls2, 1, {y: game.world.height + bbls2.height});
+                            bbltml2.to(bbls2, 1, {y: game.world.height + bbls2.height,delay:2});
                         } else if( total_score > 30 && emotes.children.length === 2){
                             var bbltml3 = new TimelineMax({yoyo: true});
                             var bbls3 = game.add.sprite(100, game.world.height,"bbl3");
                             bbls3.anchor.setTo(.5);
-                            bbls3.scale.setTo(.6);
+                            bbls3.scale.setTo(scale);
                             emotes.add(bbls3);
                             bbltml3.to(bbls3, 1, {y: game.world.height - bbls3.height/3, ease: Elastic.easeOut.config(1, 0.3)});
-                            bbltml3.to(bbls3, 1, {y: game.world.height + bbls3.height});
+                            bbltml3.to(bbls3, 1, {y: game.world.height + bbls3.height,delay:2});
                         }
                     }
                 });
@@ -592,7 +621,7 @@ function game_over(){
     l2f.position.setTo(l2.position.x, l2.position.y);
     l3f.position.setTo(l3.position.x, l3.position.y);
 
-    scores.position.setTo((game.world.width - scores.width)/2 + scores.width/2, l1.y + l1.height + 15);
+    scores.position.setTo((game.world.width - scores.width)/2 + scores.width/2, l1.y + l1.height + 20);
     scores.anchor.setTo(.5);
 
     fintext.position.setTo((game.world.width - fintext.width)/2, scores.y + scores.height/2);
