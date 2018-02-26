@@ -75,6 +75,7 @@ function preload_assets() {
     game.load.image("splash-1","assets/images/splash-1.png");
     game.load.image("splash-2","assets/images/splash-2.png");
     game.load.image("splash-3","assets/images/splash-3.png");
+    game.load.image("splash-green","assets/images/splash-green.png");
     game.load.image("beer-1","assets/images/radler-1.png");
     game.load.image("beer-2","assets/images/radler-2.png");
     game.load.image("beer-3","assets/images/rectangle-3.png");
@@ -294,6 +295,9 @@ function create() {
     leaf_emitter.makeParticles("leaf-1");
     leaf_emitter.minParticleSpeed.set(-100, 300);
     leaf_emitter.maxParticleSpeed.set(100, 300);
+    leaf_emitter.minParticleScale = .4;
+    leaf_emitter.maxParticleScale = .5;
+
     leaf_emitter.setAlpha(0.9, 0.8);
     leaf_emitter.setRotation(90, 120);
     leaf_emitter.gravity = 1;
@@ -305,6 +309,8 @@ function create() {
     leaf_emitter2.makeParticles("leaf-2");
     leaf_emitter2.minParticleSpeed.set(-200, 200);
     leaf_emitter2.maxParticleSpeed.set(100, 200);
+    leaf_emitter2.minParticleScale = .4;
+    leaf_emitter2.maxParticleScale = .5;
     leaf_emitter2.setAlpha(0.9, 0.8);
     leaf_emitter2.setRotation(90, 120);
     leaf_emitter2.gravity = 1;
@@ -446,6 +452,12 @@ function create() {
                             bub_emitter.makeParticles("bbl");
                             total_score += 3;
                         } else {
+                            var splash = game.add.sprite(t.position.x, t.position.y, "splash-green");
+                            cuts.add(splash);
+                            splash.anchor.setTo(.5);
+                            TweenMax.to(splash, 1, {alpha: 0, onComplete: function(){
+                                    splash.kill();
+                                }});
                             emitter.makeParticles("leaf-3");
                             TweenMax.to(g, 1, {height: g.height + 20});
                             TweenMax.to(beerbgg.position, 1, { y: beerbgg.position.y - 20});
