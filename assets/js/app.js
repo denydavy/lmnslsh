@@ -91,6 +91,7 @@ function preload_assets() {
 
 var pool,mask,progress_bar_active;
 var total_score = 0;
+var gameover = false;
 
 function main_menu(){
     var bg = game.add.sprite(0,0,"bg_main_menu");
@@ -102,15 +103,32 @@ function main_menu(){
     var foot = game.add.sprite(0,0,"main-screen-lemons");
     var txt = game.add.sprite(0,0,"main-screen-text");
     var logo2 = game.add.sprite(0,0,"logo");
-    txt.scale.setTo(.6);
-    logo.scale.setTo(.6);
-    btn.scale.setTo(.6);
-    foot.scale.setTo(.6);
-    logo2.scale.setTo(.65);
-    logo.position.setTo((game.world.width - logo.width)/2, 60);
-    btn.position.setTo((game.world.width - btn.width)/2, logo.y + logo.height + 80);
-    txt.position.setTo((game.world.width - txt.width)/2, logo.y + logo.height + 30);
-    foot.position.setTo(0, game.world.height - foot.height);
+
+    var scale, offset;
+
+    if(game.world.width > 400){
+        scale = .65;
+        offset = 70;
+    } else if(game.world.width > 350) {
+        scale = .6;
+        offset = 60;
+    } else {
+        scale = .5;
+        offset = 50;
+    }
+
+    txt.scale.setTo(scale);
+    logo.scale.setTo(scale);
+    btn.scale.setTo(scale);
+    foot.scale.setTo(scale);
+    logo2.scale.setTo(scale);
+
+
+    logo.position.setTo((game.world.width - logo.width)/2, offset);
+    txt.position.setTo((game.world.width - txt.width)/2, logo.y + logo.height + 15);
+    btn.position.setTo((game.world.width - btn.width)/2, txt.y + txt.height+ 5);
+
+    foot.position.setTo(0, game.world.height - foot.height+40);
     logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - foot.height/3-5);
 
     btn.inputEnabled = true;
@@ -179,7 +197,9 @@ function create() {
     timerTml.to(dObj, 30, {f:0, onUpdate: function(){
         time3.setText(dObj.f < 10? "0"+Math.floor(dObj.f) : Math.floor(dObj.f));
     }, onComplete: function () {
-      game_over();
+        gameover = true;
+        game.input.onDown.remove(handleGameClick,game);
+        game_over();
     }
     ,ease: Power0.easeNone});
     btn.scale.setTo(.6);
@@ -203,17 +223,6 @@ function create() {
     progress_bar_active.width = progress_bar.width;
     progress_bar_active.height = progress_bar.height;
 
-    //
-    // mask = game.add.graphics(progress_bar_active.x, progress_bar_active.y);
-    // mask.beginFill(0x000000);
-    // mask.drawRect(0,0,progress_bar_active.width,progress_bar_active.height/2);
-    // mask.endFill();
-    // progress_bar_active.mask = mask;
-    //
-    // mask.kill();
-    // console.log(mask);
-
-
     var mObj = {a:0};
     var pbtml = new TimelineMax();
     pbtml.to(mObj, 30, {a:progress_bar.height, onUpdate:  function(){
@@ -224,9 +233,6 @@ function create() {
             mask.endFill();
             progress_bar_active.mask = mask;
     }, ease: Power0.easeNone});
-
-
-    // progress_bar_active.mask = mask;
 
     logo.scale.setTo(.65);
     logo.position.setTo((game.width - logo.width)/2, game.height - logo.height - 20);
@@ -248,10 +254,6 @@ function create() {
     var bgtml = new TimelineMax({repeat: -1});
     var bgtml2 = new TimelineMax({yoyo: true, repeat:-1});
 
-    //tml.to(g, 30, {height:game.height - beer_bg_1.height, ease: Power0.easeNone, onUpdate: function () {
-            //console.log(g);
-        //}});
-    //tml.to(beerbgg.position, 30, {y: -(game.height), ease:Power0.easeNone}, "-=30");
     bgtml2.to(g2.position, 2, {x: -20});
 
     bgtml.from(l1.position, 1, { y:l1.position.y+l1.height, ease: Elastic.easeOut.config(1, 0.3), delay: 1});
@@ -347,8 +349,10 @@ function create() {
 
     var emotes = game.add.group(game, null, "emotes");
 
-    game.input.onDown.add(function(pointer){
-        if(!game.paused){
+    game.input.onDown.add(handleGameClick,game)
+
+    function handleGameClick(pointer){
+        if(!game.paused && !gameover){
             var start_pos = new Phaser.Point(pointer.x, pointer.y);
             var cut, tml = new TimelineMax();
 
@@ -396,7 +400,7 @@ function create() {
                         var ps = game.add.sprite(t.position.x, t.position.y, "time"+points);
                         emitters.add(ps);
                         TweenMax.to(ps, 1, {alpha: 0, onComplete: function(){
-                            ps.kill();
+                                ps.kill();
                             }});
                         if(t.key === "lemon"){
                             var splash = game.add.sprite(t.position.x, t.position.y, "splash-"+Math.ceil(Math.random()*3));
@@ -404,7 +408,7 @@ function create() {
                             splash.anchor.setTo(.5);
                             TweenMax.to(splash, 1, {alpha: 0, onComplete: function(){
                                     splash.kill();
-                            }});
+                                }});
                             TweenMax.to(g, 1, {height: g.height + 40});
                             TweenMax.to(beerbgg.position, 1, { y: beerbgg.position.y - 40});
                             emitter.makeParticles("lemon-half");
@@ -421,8 +425,8 @@ function create() {
                         emitter.minParticleSpeed.setTo(-200,-200);
                         emitter.maxParticleSpeed.setTo(200,200);
                         emitter.gravity = 0;
-                        emitter.minParticleScale = 0.5;
-                        emitter.maxParticleScale = 0.5;
+                        emitter.minParticleScale = 0.7;
+                        emitter.maxParticleScale = 0.7;
                         emitter.start(true, 700, null, 1000);
 
                         bub_emitter.minParticleSpeed.setTo(-200,-200);
@@ -471,7 +475,7 @@ function create() {
                 game.input.moveCallbacks = [];
             }, this);
         }
-    },game)
+    }
 }
 
 function check_collision(object, cut){
@@ -491,91 +495,124 @@ function drawCut(pos) {
     return c;
 }
 
-function update() {
-
-}
-
 function game_over(){
     var gameoverg = game.add.group(game, null, "gameover");
     var bg = game.add.sprite(0,0,"bg_main_menu");
     bg.width = game.world.width;
     bg.height = game.world.height;
 
+    var scale, offset;
+
+    if(game.world.width > 400){
+        scale = .65;
+        offset = 70;
+    } else if(game.world.width > 350) {
+        scale = .6;
+        offset = 60;
+    } else {
+        scale = .5;
+        offset = 50;
+    }
+
+
     var finhead = game.add.sprite(0,0,"screen-fin-header");
 
     var l1 = game.add.sprite(0,0,"lemon-empty");
     var l2 = game.add.sprite(0,0,"lemon-empty");
     var l3 = game.add.sprite(0,0,"lemon-empty");
+    var l1f, l2f, l3f;
 
-    var scores = game.add.text(0,0,total_score, {
-        font: "500 100px Ubuntu",
+    l1f = game.add.sprite(0,0,"lemon-full");
+    l2f = game.add.sprite(0,0,"lemon-full");
+    l3f = game.add.sprite(0,0,"lemon-full");
+
+    l1f.alpha = 0;
+    l2f.alpha = 0;
+    l3f.alpha = 0;
+    var scobj = {s:0};
+
+    var scores = game.add.text(0,0,scobj.s, {
+        font: "bold 80px Ubuntu",
         fill: "#037f39"
     });
     var fintext;
+
+
+    var scoretml = new TimelineMax({paused: true});
 
     if(total_score === 0){
         fintext = game.add.sprite(0,0,"finishtext-40");
     }
     else if(total_score < 40){
         fintext = game.add.sprite(0,0,"finishtext-40");
-        l1.loadTexture("lemon-full");
+        scoretml.to(l1f, .5, {alpha: 1});
     } else if( total_score > 40 && total_score < 60) {
         fintext = game.add.sprite(0,0,"finishtext-60");
-        l1.loadTexture("lemon-full");
-        l2.loadTexture("lemon-full");
+        scoretml.to(l1f, .5, {alpha: 1});
+        scoretml.to(l2f, .5, {alpha: 1});
     } else {
         fintext = game.add.sprite(0,0,"finishtext-80");
-        l1.loadTexture("lemon-full");
-        l2.loadTexture("lemon-full");
-        l3.loadTexture("lemon-full");
+
+        scoretml.to(l1f, .5, {alpha: 1});
+        scoretml.to(l2f, .5, {alpha: 1});
+        scoretml.to(l3f, .5, {alpha: 1});
 
     }
     var foot = game.add.sprite(0,0,"main-screen-lemons");
     var logo2 = game.add.sprite(0,0,"logo");
-    var getbtn = game.add.sprite(0,0,"btn-yellow-2");
-    var restartbtn = game.add.sprite(0,0,"btn-blue");
+    var getbtn = game.add.button(0,0,"btn-yellow-2", function () {
+        location.href = "shazam://openzap?zid=Ct4k1c&campaign=goesser";
+    });
+    var restartbtn = game.add.button(0,0,"btn-blue");
+    scoretml.to(scobj, 3, {s: total_score, ease: Power0.easeNone, onUpdate: function(){
+        scores.setText(Math.round(scobj.s));
+        }});
 
-
-    finhead.scale.setTo(.6);
-    l1.scale.setTo(.6);
-    l2.scale.setTo(.6);
-    l3.scale.setTo(.6);
-    fintext.scale.setTo(.6);
-    getbtn.scale.setTo(.6);
-    restartbtn.scale.setTo(.6);
-    foot.scale.setTo(.6);
-    logo2.scale.setTo(.6);
-    foot.position.setTo(0, game.world.height - foot.height + 80);
+    finhead.scale.setTo(scale);
+    l1.scale.setTo(scale);
+    l2.scale.setTo(scale);
+    l3.scale.setTo(scale);
+    l1f.scale.setTo(scale);
+    l2f.scale.setTo(scale);
+    l3f.scale.setTo(scale);
+    fintext.scale.setTo(scale);
+    getbtn.scale.setTo(scale);
+    restartbtn.scale.setTo(scale);
+    foot.scale.setTo(scale);
+    logo2.scale.setTo(scale);
+    foot.position.setTo(0, game.world.height - foot.height + 50);
     logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - logo2.height -10);
-    finhead.position.setTo((game.world.width - finhead.width)/2, 70);
+    finhead.position.setTo((game.world.width - finhead.width)/2, offset);
     l2.position.setTo((game.world.width - l1.width)/2, finhead.y + finhead.height -5);
-    l1.position.setTo(l2.x - l2.width + 10, l2.y + l2.height/4);
+    l1.position.setTo(l2.x - l2.width + 12, l2.y + l2.height/4);
 
     l3.position.setTo(l2.x + l2.width - 20, l2.y + l2.height/4);
 
-    scores.position.setTo((game.world.width - scores.width)/2, l1.y + l1.height/2 + 10);
-    fintext.position.setTo((game.world.width - fintext.width)/2, scores.y + scores.height - 10);
+    l1f.position.setTo(l1.position.x, l1.position.y);
+    l2f.position.setTo(l2.position.x, l2.position.y);
+    l3f.position.setTo(l3.position.x, l3.position.y);
+
+    scores.position.setTo((game.world.width - scores.width)/2 + scores.width/2, l1.y + l1.height + 15);
+    scores.anchor.setTo(.5);
+
+    fintext.position.setTo((game.world.width - fintext.width)/2, scores.y + scores.height/2);
     getbtn.position.setTo((game.world.width - getbtn.width)/2, fintext.y + fintext.height + 5);
     restartbtn.position.setTo((game.world.width - restartbtn.width)/2, getbtn.y + getbtn.height -10);
-
-    getbtn.inputEnabled = true;
-
-    getbtn.events.onInputDown.add(function(){
-        console.log('click');
-        location.href = "shazam://openzap?zid=Ct4k1c&campaign=goesser";
-    }, game);
 
     gameoverg.add(bg);
     gameoverg.add(finhead);
     gameoverg.add(l1);
     gameoverg.add(l2);
     gameoverg.add(l3);
+    gameoverg.add(l1f);
+    gameoverg.add(l2f);
+    gameoverg.add(l3f);
     gameoverg.add(scores);
     gameoverg.add(fintext);
-    gameoverg.add(getbtn);
-    gameoverg.add(restartbtn);
     gameoverg.add(foot);
     gameoverg.add(logo2);
+    gameoverg.add(getbtn);
+    gameoverg.add(restartbtn);
 
-
+    scoretml.play();
 }
