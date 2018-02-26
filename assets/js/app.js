@@ -1,23 +1,46 @@
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
 
-var game = new Phaser.Game(WIDTH, HEIGHT, Phaser.CANVAS, "", {
-   preload: preload,
-   //create: create,
-   update: update ,
-    enableDebug: false
-});
+var game = new Phaser.Game(WIDTH, HEIGHT, Phaser.CANVAS, "");
+
+var preload = function(game){};
+var mainmenu = function (game){};
+var lemonslash = function (game){};
+var gameover = function (game){};
+
+preload.prototype = {
+    preload: preload_assets
+};
+
+mainmenu.prototype = {
+    create: main_menu
+};
+
+lemonslash.prototype = {
+    create: create
+};
+
+gameover.prototype = {
+    create: game_over
+};
+
+
+game.state.add("preload", preload);
+game.state.add("mainmenu", mainmenu);
+game.state.add("lemonslash", lemonslash);
+game.state.add("gameover", gameover);
+game.state.start("preload");
 
 function loadFonts(){
     WebFontConfig = {
-        active: function() { game.time.events.add(Phaser.Timer.SECOND, main_menu, this); },
+        active: function() { game.time.events.add(Phaser.Timer.SECOND, game.state.start("mainmenu"), this); },
         google: {
             families: ['Ubuntu:500']
         }
     };
 }
 
-function preload() {
+function preload_assets() {
     game.load.image("bg", "assets/images/bg.png");
     game.load.image("bg_main_menu", "assets/images/bg_main_menu.png");
     game.load.image("main-screen-head", "assets/images/main-screen-head.png");
@@ -51,6 +74,15 @@ function preload() {
     game.load.image("beer-1","assets/images/radler-1.png");
     game.load.image("beer-2","assets/images/radler-2.png");
     game.load.image("beer-3","assets/images/rectangle-3.png");
+    game.load.image("screen-fin-header","assets/images/screen-fin-header.png");
+    game.load.image("lemon-empty","assets/images/lemon-empty.png");
+    game.load.image("lemon-full","assets/images/lemon-full.png");
+    game.load.image("finishtext-40","assets/images/finishtext040.png");
+    game.load.image("finishtext-60","assets/images/finishtext6080.png");
+    game.load.image("finishtext-80","assets/images/finishtext80.png");
+    game.load.image("btn-yellow","assets/images/btn-yellow.png");
+    game.load.image("btn-yellow-2","assets/images/btn-yellow-2.png");
+    game.load.image("btn-blue","assets/images/btn-blue.png");
 
     game.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
 
@@ -147,7 +179,7 @@ function create() {
     timerTml.to(dObj, 30, {f:0, onUpdate: function(){
         time3.setText(dObj.f < 10? "0"+Math.floor(dObj.f) : Math.floor(dObj.f));
     }, onComplete: function () {
-      console.log('game finished');
+      game_over();
     }
     ,ease: Power0.easeNone});
     btn.scale.setTo(.6);
@@ -216,10 +248,10 @@ function create() {
     var bgtml = new TimelineMax({repeat: -1});
     var bgtml2 = new TimelineMax({yoyo: true, repeat:-1});
 
-    tml.to(g, 30, {height:game.height - beer_bg_1.height, ease: Power0.easeNone, onUpdate: function () {
+    //tml.to(g, 30, {height:game.height - beer_bg_1.height, ease: Power0.easeNone, onUpdate: function () {
             //console.log(g);
-        }});
-    tml.to(beerbgg.position, 30, {y: -(game.height), ease:Power0.easeNone}, "-=30");
+        //}});
+    //tml.to(beerbgg.position, 30, {y: -(game.height), ease:Power0.easeNone}, "-=30");
     bgtml2.to(g2.position, 2, {x: -20});
 
     bgtml.from(l1.position, 1, { y:l1.position.y+l1.height, ease: Elastic.easeOut.config(1, 0.3), delay: 1});
@@ -264,13 +296,13 @@ function create() {
 
         function spawn(){
             var type = Math.floor(Math.random()*2) === 1 ? "lemon" : "hop";
-            var pos = new Phaser.Point(game.rnd.between(game.world.width *.2, game.world.width*.8), -100);
+            var pos = new Phaser.Point(game.rnd.between(game.world.width *.2, game.world.width*.8), -20);
             var v = get_vel();
             var obj = game.add.sprite(pos.x, pos.y, type);
             obj.anchor.setTo(.5);
             obj.scale.setTo(.7);
             game.physics.arcade.enable(obj);
-            obj.angle = v.y;
+            obj.angle = getRandomInt(-45,45);
             obj.body.setSize(100,100);
             obj.body.velocity.x = 0;
             obj.body.velocity.y = v.y;
@@ -281,8 +313,14 @@ function create() {
             schedule_spawn();
         }
 
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+        }
+
         function get_vel(){
-            return new Phaser.Point(game.rnd.between(-100, 100), game.rnd.between(350, 400));
+            return new Phaser.Point(game.rnd.between(-100, 100), game.rnd.between(450, 500));
         }
 
         return {
@@ -362,11 +400,13 @@ function create() {
                             }});
                         if(t.key === "lemon"){
                             var splash = game.add.sprite(t.position.x, t.position.y, "splash-"+Math.ceil(Math.random()*3));
-                            cuts.add(splash)
+                            cuts.add(splash);
                             splash.anchor.setTo(.5);
                             TweenMax.to(splash, 1, {alpha: 0, onComplete: function(){
                                     splash.kill();
                             }});
+                            TweenMax.to(g, 1, {height: g.height + 40});
+                            TweenMax.to(beerbgg.position, 1, { y: beerbgg.position.y - 40});
                             emitter.makeParticles("lemon-half");
                             star_emitter.makeParticles("star");
 
@@ -374,11 +414,15 @@ function create() {
                             total_score += 3;
                         } else {
                             emitter.makeParticles("leaf-3");
+                            TweenMax.to(g, 1, {height: g.height + 20});
+                            TweenMax.to(beerbgg.position, 1, { y: beerbgg.position.y - 20});
                             total_score += 1;
                         }
                         emitter.minParticleSpeed.setTo(-200,-200);
                         emitter.maxParticleSpeed.setTo(200,200);
                         emitter.gravity = 0;
+                        emitter.minParticleScale = 0.5;
+                        emitter.maxParticleScale = 0.5;
                         emitter.start(true, 700, null, 1000);
 
                         bub_emitter.minParticleSpeed.setTo(-200,-200);
@@ -448,9 +492,90 @@ function drawCut(pos) {
 }
 
 function update() {
-    // if(pool && pool.children){
-    //     pool.children.forEach(function (value) {
-    //         value.angle += Math.random();
-    //     })
-    // }
+
+}
+
+function game_over(){
+    var gameoverg = game.add.group(game, null, "gameover");
+    var bg = game.add.sprite(0,0,"bg_main_menu");
+    bg.width = game.world.width;
+    bg.height = game.world.height;
+
+    var finhead = game.add.sprite(0,0,"screen-fin-header");
+
+    var l1 = game.add.sprite(0,0,"lemon-empty");
+    var l2 = game.add.sprite(0,0,"lemon-empty");
+    var l3 = game.add.sprite(0,0,"lemon-empty");
+
+    var scores = game.add.text(0,0,total_score, {
+        font: "500 100px Ubuntu",
+        fill: "#037f39"
+    });
+    var fintext;
+
+    if(total_score === 0){
+        fintext = game.add.sprite(0,0,"finishtext-40");
+    }
+    else if(total_score < 40){
+        fintext = game.add.sprite(0,0,"finishtext-40");
+        l1.loadTexture("lemon-full");
+    } else if( total_score > 40 && total_score < 60) {
+        fintext = game.add.sprite(0,0,"finishtext-60");
+        l1.loadTexture("lemon-full");
+        l2.loadTexture("lemon-full");
+    } else {
+        fintext = game.add.sprite(0,0,"finishtext-80");
+        l1.loadTexture("lemon-full");
+        l2.loadTexture("lemon-full");
+        l3.loadTexture("lemon-full");
+
+    }
+    var foot = game.add.sprite(0,0,"main-screen-lemons");
+    var logo2 = game.add.sprite(0,0,"logo");
+    var getbtn = game.add.sprite(0,0,"btn-yellow-2");
+    var restartbtn = game.add.sprite(0,0,"btn-blue");
+
+
+    finhead.scale.setTo(.6);
+    l1.scale.setTo(.6);
+    l2.scale.setTo(.6);
+    l3.scale.setTo(.6);
+    fintext.scale.setTo(.6);
+    getbtn.scale.setTo(.6);
+    restartbtn.scale.setTo(.6);
+    foot.scale.setTo(.6);
+    logo2.scale.setTo(.6);
+    foot.position.setTo(0, game.world.height - foot.height + 80);
+    logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - logo2.height -10);
+    finhead.position.setTo((game.world.width - finhead.width)/2, 70);
+    l2.position.setTo((game.world.width - l1.width)/2, finhead.y + finhead.height -5);
+    l1.position.setTo(l2.x - l2.width + 10, l2.y + l2.height/4);
+
+    l3.position.setTo(l2.x + l2.width - 20, l2.y + l2.height/4);
+
+    scores.position.setTo((game.world.width - scores.width)/2, l1.y + l1.height/2 + 10);
+    fintext.position.setTo((game.world.width - fintext.width)/2, scores.y + scores.height - 10);
+    getbtn.position.setTo((game.world.width - getbtn.width)/2, fintext.y + fintext.height + 5);
+    restartbtn.position.setTo((game.world.width - restartbtn.width)/2, getbtn.y + getbtn.height -10);
+
+    getbtn.inputEnabled = true;
+
+    getbtn.events.onInputDown.add(function(){
+        console.log('click');
+        location.href = "shazam://openzap?zid=Ct4k1c&campaign=goesser";
+    }, game);
+
+    gameoverg.add(bg);
+    gameoverg.add(finhead);
+    gameoverg.add(l1);
+    gameoverg.add(l2);
+    gameoverg.add(l3);
+    gameoverg.add(scores);
+    gameoverg.add(fintext);
+    gameoverg.add(getbtn);
+    gameoverg.add(restartbtn);
+    gameoverg.add(foot);
+    gameoverg.add(logo2);
+
+
 }
