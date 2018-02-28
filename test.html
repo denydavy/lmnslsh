@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.3/TweenMax.min.js"></script>
+<script src="assets/js/pixi.min.js"></script>
+<script src="assets/js/phaser.min.js"></script>
+
+<script>
+    var WIDTH = window.innerWidth;
+    var HEIGHT = window.innerHeight;
+    var game = new Phaser.Game(WIDTH, HEIGHT, Phaser.CANVAS, "");
+
+    var preload = function(game){};
+    var running = function(game){};
+    var gameover = function (game){};
+
+    preload.prototype = {
+        preload: function () {
+            game.load.image("l", "assets/images/lemon-half.png");
+        },
+        create: function () {
+            game.state.start("running");
+        }
+    };
+
+    running.prototype = {
+        create: function () {
+            this.el = game.add.sprite(game.world.width/2,game.world.height/2,"l");
+            this.el2 = game.add.sprite(game.world.width/2,game.world.height/2,"l");
+            this.elg = game.add.group(game, null, "g");
+            this.mObj = {a:0};
+
+            setTimeout(function () {
+                this.elg.kill();
+                game.state.start("gameover");
+            }, 2000);
+
+            this.pbtml = new TimelineMax({paused: true});
+            this.pbtml.to(this.mObj, 2, {a: this.el.height, onUpdate: function () {
+                this.mask = game.add.graphics(this.el.x, this.el.y + this.el.height);
+                this.mask.beginFill(0x000000);
+                this.mask.drawRect(0,0-this.mObj.a,this.el.width,this.mObj.a);
+                this.mask.endFill();
+                this.el.mask = this.mask;
+                // console.log(this.mObj.a);
+            }.bind(this)})
+
+            this.elg.add(this.el);
+        },
+        update: function () {
+            if(!this.pbtml.running) this.pbtml.play();
+        }
+    };
+
+    gameover.prototype = {
+        create: function () {
+            game.add.button(0,0,"l",function () {
+                game.state.start("running")
+            });
+        }
+    };
+
+    game.state.add("preload", preload);
+    game.state.add("running", running);
+    game.state.add("gameover", gameover);
+    game.state.start("preload");
+</script>
+</body>
+</html>

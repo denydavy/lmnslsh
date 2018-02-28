@@ -17,7 +17,10 @@ mainmenu.prototype = {
 };
 
 lemonslash.prototype = {
-    create: create
+    create: create,
+    update: function () {
+        if(!this.pbtml.running) this.pbtml.play();
+    }
 };
 
 gameover.prototype = {
@@ -94,9 +97,8 @@ function preload_assets() {
     loadFonts();
 }
 
-var pool,mask,progress_bar_active;
+var pool;
 var total_score = 0;
-var gameover = false;
 
 function main_menu(){
     var bg = game.add.sprite(0,0,"bg_main_menu");
@@ -152,7 +154,7 @@ function main_menu(){
         logo.kill();
         foot.kill();
         btn.kill();
-        create();
+        game.state.start("lemonslash");
     }, game);
 }
 
@@ -203,12 +205,24 @@ function create() {
     });
     var btn = game.add.button(0,0,"pause", function () {
         game.paused = !game.paused;
-        if(game.paused) btn.loadTexture("play");
-        else btn.loadTexture("pause");
+        if(game.paused) {
+            btn.loadTexture("play");
+            timerTml.pause();
+            this.pbtml.pause();
+            bgtml.pause();
+            bgtml2.pause();
+        }
+        else{
+            timerTml.play();
+            this.pbtml.play();
+            bgtml.play();
+            bgtml2.play();
+            btn.loadTexture("pause");
+        }
     }, this, 2, 1, 0);
 
-    var progress_bar = game.add.sprite(0,0,"pb");
-    progress_bar_active = game.add.sprite(0,0,"pb2");
+    this.progress_bar = game.add.sprite(0,0,"pb");
+    this.progress_bar_active = game.add.sprite(0,0,"pb2");
     var logo = game.add.sprite(0,0,"logo");
     var beer_bg_1 = game.add.sprite(0,0,"beer-1");
 
@@ -222,16 +236,6 @@ function create() {
     beerbgg.add(g2);
     beerbgg.add(l1);
 
-    var dObj = {f:30};
-    var timerTml = new TimelineMax();
-    timerTml.to(dObj, 30, {f:0, onUpdate: function(){
-        time3.setText(dObj.f < 10? "0"+Math.floor(dObj.f) : Math.floor(dObj.f));
-    }, onComplete: function () {
-        gameover = true;
-        game.input.onDown.remove(handleGameClick,game);
-        game_over();
-    }
-    ,ease: Power0.easeNone});
     btn.scale.setTo(scale);
     scoreboard.scale.setTo(scale);
     bg.width = game.width;
@@ -245,24 +249,24 @@ function create() {
     score.anchor.setTo(.5);
     score.position.setTo(scoreboard.x + scoreboard.width/2 + offset*1.5, scoreboard.y+scoreboard.height / 2+4);
     btn.position.setTo(WIDTH - btn.width - offset,17);
-    progress_bar.position.setTo(20, menu.height + 20);
-    progress_bar.height = game.height - menu.height - 40;
-    progress_bar.width = 15;
+    this.progress_bar.position.setTo(20, menu.height + 20);
+    this.progress_bar.height = game.height - menu.height - 40;
+    this.progress_bar.width = 15;
 
-    progress_bar_active.position.setTo(progress_bar.x, progress_bar.y);
-    progress_bar_active.width = progress_bar.width;
-    progress_bar_active.height = progress_bar.height;
+    this.progress_bar_active.position.setTo(this.progress_bar.x, this.progress_bar.y);
+    this.progress_bar_active.width = this.progress_bar.width;
+    this.progress_bar_active.height = this.progress_bar.height;
 
-    var mObj = {a:0};
-    var pbtml = new TimelineMax();
-    pbtml.to(mObj, 30, {a:progress_bar.height, onUpdate:  function(){
-            if(mask !== undefined) mask.kill();
-            mask = game.add.graphics(progress_bar_active.x, progress_bar_active.y + progress_bar_active.height);
-            mask.beginFill(0x000000);
-            mask.drawRect(0,0-mObj.a,progress_bar_active.width,mObj.a);
-            mask.endFill();
-            progress_bar_active.mask = mask;
-    }, ease: Power0.easeNone});
+    this.mObj = {a:0};
+    this.pbtml = new TimelineMax({paused: true});
+
+    this.pbtml.to(this.mObj, 30, {a:this.progress_bar.height, onUpdate:  function(){
+        this.mask = game.add.graphics(this.progress_bar_active.x, this.progress_bar_active.y + this.progress_bar_active.height);
+        this.mask.beginFill(0x000000);
+        this.mask.drawRect(0,0-this.mObj.a,this.progress_bar_active.width,this.mObj.a);
+        this.mask.endFill();
+        this.progress_bar_active.mask = this.mask;
+    }.bind(this), ease: Power0.easeNone});
 
     logo.scale.setTo(scale);
     logo.position.setTo((game.width - logo.width)/2, game.height - logo.height - 20);
@@ -378,16 +382,29 @@ function create() {
     menugroup.add(time3);
     menugroup.add(score);
     menugroup.add(btn);
-    menugroup.add(progress_bar);
-    menugroup.add(progress_bar_active);
+    menugroup.add(this.progress_bar);
+    menugroup.add(this.progress_bar_active);
     menugroup.add(logo);
 
     var emotes = game.add.group(game, null, "emotes");
 
-    game.input.onDown.add(handleGameClick,game)
+    game.input.onDown.add(handleGameClick,game);
+    var dObj = {f:30};
+    var timerTml = new TimelineMax();
+    timerTml.to(dObj, 30, {f:0, onUpdate: function(){
+            time3.setText(dObj.f < 10? "0"+Math.floor(dObj.f) : Math.floor(dObj.f));
+        }, onComplete: function () {
+            game.world.removeAll();
+            TweenMax.set(beerbgg.position, {x:0, y:0});
+            game.input.onDown.remove(handleGameClick,game);
+            game.state.start("gameover");
+        }
+        ,ease: Power0.easeNone});
+
+
 
     function handleGameClick(pointer){
-        if(!game.paused && !gameover){
+        if(!game.paused){
             var start_pos = new Phaser.Point(pointer.x, pointer.y);
             var cut, tml = new TimelineMax();
 
@@ -537,6 +554,7 @@ function drawCut(pos) {
 }
 
 function game_over(){
+    // if(game.state.current !== "gameover") game.state.start("gameover");
     var gameoverg = game.add.group(game, null, "gameover");
     var bg = game.add.sprite(0,0,"bg_main_menu");
     bg.width = game.world.width;
@@ -604,10 +622,27 @@ function game_over(){
     var getbtn = game.add.button(0,0,"btn-yellow-2", function () {
         location.href = "shazam://openzap?zid=Ct4k1c&campaign=goesser";
     });
-    var restartbtn = game.add.button(0,0,"btn-blue");
+    var restartbtn = game.add.button(0,0,"btn-blue", function () {
+        gameoverg.remove(bg);
+        gameoverg.remove(finhead);
+        gameoverg.remove(l1);
+        gameoverg.remove(l2);
+        gameoverg.remove(l3);
+        gameoverg.remove(l1f);
+        gameoverg.remove(l2f);
+        gameoverg.remove(l3f);
+        gameoverg.remove(scores);
+        gameoverg.remove(fintext);
+        gameoverg.remove(foot);
+        gameoverg.remove(logo2);
+        gameoverg.remove(getbtn);
+        gameoverg.remove(restartbtn);
+        total_score = 0;
+        game.state.start("lemonslash");
+    });
     scoretml.to(scobj, 3, {s: total_score, ease: Power0.easeNone, onUpdate: function(){
         scores.setText(Math.round(scobj.s));
-        }});
+        },ease: Power0.easeNone});
 
     finhead.scale.setTo(scale);
     l1.scale.setTo(scale);
