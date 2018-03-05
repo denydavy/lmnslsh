@@ -572,7 +572,7 @@ function game_over(){
         scale = .5;
         offset = 50;
     }
-    var locked = false;
+    var locked = true;
 
     var finhead = game.add.sprite(0,0,"screen-fin-header");
 
