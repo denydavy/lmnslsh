@@ -572,7 +572,7 @@ function game_over(){
         scale = .5;
         offset = 50;
     }
-
+    var locked = false;
 
     var finhead = game.add.sprite(0,0,"screen-fin-header");
 
@@ -620,28 +620,32 @@ function game_over(){
     var foot = game.add.sprite(0,0,"main-screen-lemons");
     var logo2 = game.add.sprite(0,0,"logo");
     var getbtn = game.add.button(0,0,"btn-yellow-2", function () {
-        location.href = "shazam://openzap?zid=Ct4k1c&campaign=goesser";
+        if(!locked) location.href = "shazam://openzap?zid=Tp7m1c&campaign=goesser";
     });
     var restartbtn = game.add.button(0,0,"btn-blue", function () {
-        gameoverg.remove(bg);
-        gameoverg.remove(finhead);
-        gameoverg.remove(l1);
-        gameoverg.remove(l2);
-        gameoverg.remove(l3);
-        gameoverg.remove(l1f);
-        gameoverg.remove(l2f);
-        gameoverg.remove(l3f);
-        gameoverg.remove(scores);
-        gameoverg.remove(fintext);
-        gameoverg.remove(foot);
-        gameoverg.remove(logo2);
-        gameoverg.remove(getbtn);
-        gameoverg.remove(restartbtn);
-        total_score = 0;
-        game.state.start("lemonslash");
+        if(!locked){
+            gameoverg.remove(bg);
+            gameoverg.remove(finhead);
+            gameoverg.remove(l1);
+            gameoverg.remove(l2);
+            gameoverg.remove(l3);
+            gameoverg.remove(l1f);
+            gameoverg.remove(l2f);
+            gameoverg.remove(l3f);
+            gameoverg.remove(scores);
+            gameoverg.remove(fintext);
+            gameoverg.remove(foot);
+            gameoverg.remove(logo2);
+            gameoverg.remove(getbtn);
+            gameoverg.remove(restartbtn);
+            total_score = 0;
+            game.state.start("lemonslash");
+        }
     });
     scoretml.to(scobj, 3, {s: total_score, ease: Power0.easeNone, onUpdate: function(){
         scores.setText(Math.round(scobj.s));
+        }, onComplete: function(){
+        locked = !locked;
         },ease: Power0.easeNone});
 
     finhead.scale.setTo(scale);
