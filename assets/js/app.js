@@ -144,7 +144,7 @@ function main_menu(){
     txt2.position.setTo((game.world.width - txt2.width)/2, txt.y + txt.height - 5);
     btn.position.setTo((game.world.width - btn.width)/2, txt2.y + txt2.height+ 5);
 
-    foot.position.setTo(0, game.world.height - foot.height+40);
+    foot.position.setTo(0, game.world.height - foot.height+80);
     logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - foot.height/3-5);
 
     btn.inputEnabled = true;
