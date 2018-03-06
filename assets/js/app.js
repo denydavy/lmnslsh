@@ -144,7 +144,7 @@ function main_menu(){
     txt2.position.setTo((game.world.width - txt2.width)/2, txt.y + txt.height - 5);
     btn.position.setTo((game.world.width - btn.width)/2, txt2.y + txt2.height+ 5);
 
-    foot.position.setTo(0, game.world.height - foot.height+80);
+    foot.position.setTo(0, game.world.height - foot.height+100);
     logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - foot.height/3-5);
 
     btn.inputEnabled = true;
@@ -660,7 +660,7 @@ function game_over(){
     restartbtn.scale.setTo(scale);
     foot.scale.setTo(scale);
     logo2.scale.setTo(scale);
-    foot.position.setTo(0, game.world.height - foot.height + 50);
+    foot.position.setTo(0, game.world.height - foot.height + 100);
     logo2.position.setTo((game.world.width - logo2.width)/2+5, game.world.height - logo2.height -10);
     finhead.position.setTo((game.world.width - finhead.width)/2, offset);
     l2.position.setTo((game.world.width - l1.width)/2, finhead.y + finhead.height -5);
